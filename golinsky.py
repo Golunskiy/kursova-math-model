@@ -361,11 +361,11 @@ def bo_plot(res):
 def func_h(x0, e, grad_schema, mop, mop_e, alpha, cret, restart):
     hs = [1/10**el for el in range(1, 10)]
 
-    df = pd.DataFrame()
+    df = pd.DataFrame(columns=['h', 'count', 'x', 'f(x)'])
     for h in hs:
         obj = method_pirsona_3(x0, e, h, grad_schema, mop, mop_e, alpha, cret, restart)
         row = {'h': format(obj['h']), 'count': obj['count'], 'x': obj['x'], 'f(x)': f(obj['x'])}
-        df = df.append(row, ignore_index=True)
+        df.loc[len(df)] = row
 
     df['count'] = df['count'].astype(int)
     # df = df.sort_values('count')
@@ -376,7 +376,7 @@ def func_h(x0, e, grad_schema, mop, mop_e, alpha, cret, restart):
 def func_grad_schema(x0, e, h, mop, mop_e, alpha, cret, restart):
     schemas = [-1, 1, 0]
 
-    df = pd.DataFrame()
+    df = pd.DataFrame(columns=['schema', 'count', 'x', 'f(x)'])
     for schema in schemas:
         obj = method_pirsona_3(x0, e, h, schema, mop, mop_e, alpha, cret, restart)
         if obj['schema'] == -1:
@@ -386,7 +386,7 @@ def func_grad_schema(x0, e, h, mop, mop_e, alpha, cret, restart):
         elif obj['schema'] == 1:
             _schema = 'права'
         row = {'schema': _schema, 'count': obj['count'], 'x': obj['x'], 'f(x)': f(obj['x'])}
-        df = df.append(row, ignore_index=True)
+        df.loc[len(df)] = row
 
     df['count'] = df['count'].astype(int)
 
@@ -496,13 +496,13 @@ def func_sven(x0, e, h, grad_schema, mop, mop_e, cret, restart):
 
 
 def func_cret(x0, e, h, grad_schema, mop, mop_e, alpha, restart):
-    df = pd.DataFrame()
+    df = pd.DataFrame(columns=['Критерій', 'count', 'x', 'f(x)'])
 
     for cret in [1, 2]:
         obj = method_pirsona_3(x0, e, h, grad_schema, mop, mop_e, alpha, cret, restart)
 
         new_row = {'Критерій': obj['cret'], 'count': obj['count'], 'x': obj['x'], 'f(x)': f(obj['x'])}
-        df = df.append(new_row, ignore_index=True)
+        df.loc[len(df)] = new_row
 
     df['count'] = df['count'].astype(int)
     df['Критерій'] = df['Критерій'].astype(int)
@@ -510,15 +510,15 @@ def func_cret(x0, e, h, grad_schema, mop, mop_e, alpha, restart):
 
 
 def func_restart(x0, e, h, grad_schema, mop, mop_e, alpha, cret):
-    df = pd.DataFrame()
+    df = pd.DataFrame(columns=['restart', 'count', 'x', 'f(x)'])
 
     obj = method_pirsona_3(x0, e, h, grad_schema, mop, mop_e, alpha, cret, False)
     new_row = {'restart': 'Відсутні', 'count': obj['count'], 'x': obj['x'], 'f(x)': f(obj['x'])}
-    df = df.append(new_row, ignore_index=True)
+    df.loc[len(df)] = new_row
 
     obj = method_pirsona_3(x0, e, h, grad_schema, mop, mop_e, alpha, cret, True)
     new_row = {'restart': 'Наявні', 'count': obj['count'], 'x': obj['x'], 'f(x)': f(obj['x'])}
-    df = df.append(new_row, ignore_index=True)
+    df.loc[len(df)] = new_row
 
     df['count'] = df['count'].astype(int)
     print(df)
@@ -526,12 +526,12 @@ def func_restart(x0, e, h, grad_schema, mop, mop_e, alpha, cret):
 
 def func_e(x0, h, grad_schema, mop, mop_e, alpha, cret, restart, k=10**(-7)):
     es = [1/10**item for item in range(1, 15)]
-    df = pd.DataFrame()
+    df = pd.DataFrame(columns=['e', 'count', 'x', 'f(x)'])
 
     for ei in es:
         obj = method_pirsona_3(x0, ei, h, grad_schema, mop, mop_e, alpha, cret, restart, k=k)
         new_row = {'e': format(obj['e']), 'count': obj['count'], 'x': obj['x'], 'f(x)': f(obj['x'])}
-        df = df.append(new_row, ignore_index=True)
+        df.loc[len(df)] = new_row
 
     df['count'] = df['count'].astype(int)
     # df['e'] = df['e'].astype(int)
@@ -583,7 +583,7 @@ def func_k(x0, h, grad_schema, mop, mop_e, alpha, cret, restart):
 
 def yo(x0, e, h, grad_schema, mop, mop_e, alpha, creterion, restart, k):
     R = 1
-    df = pd.DataFrame()
+    df = pd.DataFrame(columns=['R', 'count', 'x', 'f(x)'])
 
     yo = 2
 
@@ -601,7 +601,7 @@ def yo(x0, e, h, grad_schema, mop, mop_e, alpha, creterion, restart, k):
             print('break')
             break
         new_row = {'R': obj['R'], 'count': obj['count'], 'x': obj['x'], 'f(x)': f(obj['x'])}
-        df = df.append(new_row, ignore_index=True)
+        df.loc[len(df)] = new_row
 
         x0 = obj['x']
         all_xs.append(obj['x'])
@@ -669,7 +669,7 @@ restart = False
 # bo_plot(res)
 
 # Крок похідних
-# func_h(x0, e, grad_schema, mop, mop_e, alpha, cret, restart)
+func_h(x0, e, grad_schema, mop, mop_e, alpha, cret, restart)
 h = 0.001
 
 # Схема похідних
@@ -702,3 +702,13 @@ e = 10**(-12)
 
 # УМОВНА ОПТИМІЗАЦІЯ
 # yo(x0, e, h, grad_schema, mop, mop_e, alpha, cret, restart, k)
+
+e = 10**(-14)
+x0 = np.array([-1.2, 0])
+# КІНЦЕВИЙ ЗАПУСК
+# res = method_pirsona_3(x0, e, h, grad_schema, mop, mop_e, alpha, cret, restart, k)
+# print(f'x: {res["x"]}')
+# print(f"f(x): {f(res['x'])}")
+# print(f"count: {res['count']}")
+# bo_plot(res)
+
