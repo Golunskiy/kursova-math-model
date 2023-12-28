@@ -433,11 +433,11 @@ def func_mop(x0, e, h, grad_schema, alpha, cret, restart):
     es = [1 / 10 ** item for item in range(1, 9)]
 
     if True:
-        df_gold = pd.DataFrame()
+        df_gold = pd.DataFrame(columns=['e', 'count', 'x', 'f(x)'])
         for mop_e in es:
             obj = method_pirsona_3(x0, e, h, grad_schema, 'gold', mop_e, alpha, cret, restart)
             new_row = {'e': format(obj['mop_e']), 'count': obj['count'], 'x': obj['x'], 'f(x)': f(obj['x'])}
-            df_gold = df_gold.append(new_row, ignore_index=True)
+            df_gold.loc[len(df_gold)] = new_row
 
         df_gold['count'] = df_gold['count'].astype(int)
         print('gold')
@@ -445,11 +445,11 @@ def func_mop(x0, e, h, grad_schema, alpha, cret, restart):
         print()
 
     if True:
-        df_dsk = pd.DataFrame()
+        df_dsk = pd.DataFrame(columns=['e', 'count', 'x', 'f(x)'])
         for mop_e in es:
             obj = method_pirsona_3(x0, e, h, grad_schema, 'dsk', mop_e, alpha, cret, restart)
             new_row = {'e': format(obj['mop_e']), 'count': obj['count'], 'x': obj['x'], 'f(x)': f(obj['x'])}
-            df_dsk = df_dsk.append(new_row, ignore_index=True)
+            df_dsk.loc[len(df_dsk)] = new_row
 
         df_dsk['count'] = df_dsk['count'].astype(int)
         print('dsk')
@@ -466,11 +466,11 @@ def func_sven(x0, e, h, grad_schema, mop, mop_e, cret, restart):
         alphas = alphases[ind]
         alphas.reverse()
 
-        df_dsk = pd.DataFrame()
+        df_dsk = pd.DataFrame(columns=['a', 'count', 'x', 'f(x)'])
         for alpha in alphas:
             obj = method_pirsona_3(x0, e, h, grad_schema, mop, mop_e, alpha, cret, restart)
             new_row = {'a': format(obj['alpha']), 'count': obj['count'], 'x': obj['x'], 'f(x)': f(obj['x'])}
-            df_dsk = df_dsk.append(new_row, ignore_index=True)
+            df_dsk.loc[len(df_dsk)] = new_row
 
         df_dsk['count'] = df_dsk['count'].astype(int)
         print(df_dsk)
@@ -562,7 +562,7 @@ def func_k(x0, h, grad_schema, mop, mop_e, alpha, cret, restart):
     # ks = [num for num in range(50, 1000, 50)]
     # ks = [10 * num for num in range(100, 1001, 50)]
 
-    df_main = pd.DataFrame()
+    df_main = pd.DataFrame(columns=['k', 'e', 'count', 'x', 'f(x)'])
 
     for k in ks:
         df = func_e(x0, h, grad_schema, mop, mop_e, alpha, cret, restart, k=k)
@@ -571,10 +571,12 @@ def func_k(x0, h, grad_schema, mop, mop_e, alpha, cret, restart):
 
         df = df[(df['count'] < 600)]
         df = df[(df['e'] == df['e'].min())]
-
         df.insert(0, 'k', k)
 
-        df_main = df_main.append(df, ignore_index=True)
+        columns_dict = df.to_dict()
+        columns_dict_cleaned = {key: next(iter(val.values())) for key, val in columns_dict.items()}
+
+        df_main.loc[len(df_main)] = columns_dict_cleaned
 
     df_main['k'] = df_main['k'].apply(lambda x: '{:.0e}'.format(x) if x < 1 else int(x))
     df_main['e'] = df_main['e'].map('{:.0e}'.format)
@@ -669,7 +671,7 @@ restart = False
 # bo_plot(res)
 
 # Крок похідних
-func_h(x0, e, grad_schema, mop, mop_e, alpha, cret, restart)
+# func_h(x0, e, grad_schema, mop, mop_e, alpha, cret, restart)
 h = 0.001
 
 # Схема похідних
@@ -690,13 +692,13 @@ alpha = 0.1
 cret = 2
 
 # Рестарти та точність
-# func_restart(x0, e, h, grad_schema, mop, mop_e, alpha, cret)
-# func_e(x0, h, grad_schema, mop, mop_e, alpha, cret, False)
-# func_e(x0, h, grad_schema, mop, mop_e, alpha, cret, True)
+func_restart(x0, e, h, grad_schema, mop, mop_e, alpha, cret)
+func_e(x0, h, grad_schema, mop, mop_e, alpha, cret, False)
+func_e(x0, h, grad_schema, mop, mop_e, alpha, cret, True)
 restart = True
 
 # k
-# func_k(x0, h, grad_schema, mop, mop_e, alpha, cret, restart)
+#func_k(x0, h, grad_schema, mop, mop_e, alpha, cret, restart)
 k = 1
 e = 10**(-12)
 
